@@ -62,7 +62,7 @@ include './views/components/admin_navbar.php';
                             </td>
                             <td class="px-6 py-4 text-sm align-middle"><?php echo $product['name'];?></td>
                             <td class="px-6 py-4 text-sm font-semibold align-middle"><?php echo number_format($product['price'], 0);?></td>
-                            <td class="px-6 py-4 text-sm align-middle"><?php echo $product['category_id'];?></td>
+                            <td class="px-6 py-4 text-sm align-middle"><?php echo $product['category_name'];?></td>
                             <td class="px-6 py-4 text-sm align-middle"><?php echo date('d/m/Y', strtotime($product['created_at']));?></td>
                             <td class="px-6 py-4 text-sm align-middle"> <!-- Thêm cột hành động nếu cần -->
                                 <!-- ... -->
