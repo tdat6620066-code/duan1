@@ -25,5 +25,21 @@
         </div>
     </div>
 </body>
+<body>
+    <?php include('./views/components/navbar.php'); ?>
+
+    <div class="container">
+        <div class="row">
+            <h1 class="mb-5">Trang chủ</h1>
+
+            <h3>Top 5 sản phẩm mới nhất</h3>
+            <ul>
+                <?php foreach ($top5ProductLatest as $product) : ?>
+                    <li><?= $product['name'] ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    </div>
+</body>
 
 </html>
