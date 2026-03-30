@@ -33,4 +33,9 @@ class Product {
         $stmt = $this->conn->prepare($query);
         return $stmt->execute([$data['category_id'], $data['name'], $data['description'], $data['price'], $data['image_url'], $id]);
     }
+    public function delete($id){
+        $query = "DELETE FROM products WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([$id]);
+    }
 }

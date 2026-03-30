@@ -69,6 +69,11 @@ include './views/components/admin_navbar.php';
                                class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs transition">
                             Sửa
                             </a>
+                            <a href="<?php echo BASE_URL; ?>?act=admin_product_delete&id=<?php echo $product['id'];?>"
+                            onclick="return confirm('Bạn chắc chắn muốn xóa không?')"
+                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs transition">
+                        Xóa
+                        </a>
                             </td>
                         </tr>
                     <?php endforeach;?>

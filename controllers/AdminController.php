@@ -132,4 +132,15 @@ class AdminController {
         $categories = $this->categoryModel->getAll();
         require_once './views/admin/product_edit.php';
     }
+    public function productDelete(){
+        $id = (int)$_GET['id'] ?? 0;
+        if($this->productModel->delete($id)){
+            header('Location: ' . BASE_URL . '?act=admin_products');
+            exit;
+        }else {
+            $_SESSION['error'] = 'Không thể xóa sản phẩm';
+            header('Location: ' . BASE_URL . '?act=admin_products');
+            exit;
+        }
+    }
 }
