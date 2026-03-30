@@ -30,4 +30,8 @@ switch ($act) {
         case 'admin-product-create':
             (new AdminController())->productCreate();
             break;
+    case 'admin_product_edit':
+        case 'admin-product-edit':
+            (new AdminController())->productEdit();
+            break;
 };

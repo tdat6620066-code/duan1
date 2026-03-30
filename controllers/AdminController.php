@@ -80,4 +80,56 @@ class AdminController {
         $categories = $this->categoryModel->getAll();
         require_once './views/admin/product_create.php';
     }
+    public function productEdit(){
+        $id = (int)$_GET['id'] ?? 0;
+        $product = $this->productModel->getById($id);
+        if(!$product){
+            header('Location: ' . BASE_URL . '?act=admin_products');
+            exit;
+        }
+        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            $error = '';
+            $category_id = (int)($_POST['category_id'] ?? 0);
+            $name = trim($_POST['name'] ?? '');
+            $description = trim($_POST['description'] ?? '');
+            $price = isset($_POST['price']) ? (float)$_POST['price'] : 0;
+            $imageUrl = $this->handleImageUpload('image');
+            if(!$imageUrl){
+                $imageUrl = trim($_POST['image_url'] ?? $product['image_url'] ?? '');
+            }
+            if($category_id <= 0){
+                $error .= 'Vui lòng chọn danh mục.<br>';
+            }
+            if($name === ''){
+                $error .= 'Vui lòng chọn tên sản phẩm.<br>';
+            }
+            if($description === ''){
+                $error .= 'Vui lòng nhập mô tả.<br>';
+            }
+            if($price <=0){
+                $error .= 'Giá phải lớn hơn 0 .<br>';
+            }
+            if(empty($imageUrl)){
+                $error .= 'Vui lòng chọn hình ảnh.<br>';
+            }
+            if($error === ''){
+                $data = [
+                    'id' => $id,
+                    'category_id' => $category_id,
+                    'name' => $name,
+                    'description' => $description,
+                    'price' => $price,
+                    'image_url' => $imageUrl,
+                ];
+                if($this->productModel->update($id, $data)){
+                    header('Location: ' . BASE_URL . '?act=admin_products');
+                    exit;
+                }else {
+                    $error = 'Cập nhật sản phẩm thất bại';
+                }
+            }
+        }
+        $categories = $this->categoryModel->getAll();
+        require_once './views/admin/product_edit.php';
+    }
 }

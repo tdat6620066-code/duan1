@@ -60,12 +60,15 @@ include './views/components/admin_navbar.php';
                                     <span class="text-gray-400 italic">Không có ảnh</span>
                                 <?php endif;?>
                             </td>
-                            <td class="px-6 py-4 text-sm align-middle"><?php echo $product['name'];?></td>
-                            <td class="px-6 py-4 text-sm font-semibold align-middle"><?php echo number_format($product['price'], 0);?></td>
-                            <td class="px-6 py-4 text-sm align-middle"><?php echo $product['category_name'];?></td>
-                            <td class="px-6 py-4 text-sm align-middle"><?php echo date('d/m/Y', strtotime($product['created_at']));?></td>
-                            <td class="px-6 py-4 text-sm align-middle"> <!-- Thêm cột hành động nếu cần -->
-                                <!-- ... -->
+                            <td class="px-6 py-4 text-sm "><?php echo $product['name'];?></td>
+                            <td class="px-6 py-4 text-sm font-semibold"><?php echo number_format($product['price'], 0);?></td>
+                            <td class="px-6 py-4 text-sm "><?php echo $product['category_name'];?></td>
+                            <td class="px-6 py-4 text-sm "><?php echo date('d/m/Y', strtotime($product['created_at']));?></td>
+                            <td class="px-6 py-4 text-sm flex gap-2"> 
+                               <a href="<?php echo BASE_URL; ?>?act=admin_product_edit&id=<?php echo $product['id'];?>"
+                               class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs transition">
+                            Sửa
+                            </a>
                             </td>
                         </tr>
                     <?php endforeach;?>

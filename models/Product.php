@@ -28,4 +28,9 @@ class Product {
         $stmt = $this->conn->prepare($query);
         return $stmt->execute([$data['category_id'], $data['name'], $data['description'], $data['price'], $data['image_url']]);
     }
+    public function update($id,$data){
+        $query = "UPDATE products SET category_id = ?, name = ?, description = ?, price = ?, image_url = ? WHERE id = ? ";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([$data['category_id'], $data['name'], $data['description'], $data['price'], $data['image_url'], $id]);
+    }
 }
