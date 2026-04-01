@@ -4,7 +4,7 @@
             <!-- Logo -->
             <div class="flex-shrink-0">
                 <a href="<?= BASE_URL ?>" class="text-2xl font-bold text-gray-900">
-                    ShoeStore
+                    SHOP TTAD
                 </a>
             </div>
 
