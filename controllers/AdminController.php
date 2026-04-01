@@ -143,4 +143,23 @@ class AdminController {
             exit;
         }
     }
+    public function categories(){
+        $categories = $this->categoryModel->getAll();
+        require_once './views/admin/categories.php';
+    }
+    public function categoryCreate(){
+        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            $data = [
+                'name' => trim($_POST['name']),
+                'description' => trim($_POST['description'])
+            ];
+            if($this->categoryModel->create($data)){
+                header('Location: ' . BASE_URL . '?act=admin_categories');
+                exit;
+            }else {
+                $error = 'Thêm danh mục thất bại';
+            }
+        }
+        require_once './views/admin/category_create.php';
+    }
 }

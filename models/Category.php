@@ -17,4 +17,10 @@ class Category {
         $stmt->execute([$id]);
         return $stmt->fetch();
     }
+    public function create($data){
+       $query = "INSERT INTO categories (name) VALUES (?)"; 
+       $stmt = $this->conn->prepare($query);
+       return $stmt->execute([$data['name']]);
+
+    }
 }

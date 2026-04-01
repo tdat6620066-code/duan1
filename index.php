@@ -38,4 +38,12 @@ switch ($act) {
         case 'admin-product-delete':
             (new AdminController())->productDelete();
             break;
+    case 'admin_categories':
+        case 'admin_categories':
+            (new AdminController())->categories();
+            break;
+    case 'admin_category_create':
+        case 'admin_category_create':
+            (new AdminController())->categoryCreate();
+            break;
 };
