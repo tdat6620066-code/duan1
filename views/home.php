@@ -22,6 +22,7 @@
                     <li><?= $product['name'] ?></li>
                 <?php endforeach; ?>
             </ul>
+        
         </div>
     </div>
 </body>
