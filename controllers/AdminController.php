@@ -183,4 +183,15 @@ class AdminController {
         }
         require_once './views/admin/category_edit.php';
     }
+    public function categoryDelete(){
+        $id = (int)$_GET['id'] ?? 0;
+        if($this->categoryModel->delete($id)){
+            header('Location: ' . BASE_URL . '?act=admin_categories');
+            exit;
+        }else {
+            $_SESSION['error'] = 'Không thể xóa danh mục';
+            header('Location: ' . BASE_URL . '?act=admin_categories');
+            exit;
+        }
+    }
 }

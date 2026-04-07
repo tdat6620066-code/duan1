@@ -29,4 +29,9 @@ class Category {
         $stmt = $this->conn->prepare($query);
         return $stmt->execute([$data['name'], $id]);
     }
+    public function delete($id){
+        $query = "DELETE FROM categories WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([$id]);
+    }
 }

@@ -58,6 +58,9 @@ include './views/components/admin_navbar.php';
           <td class="px-6 py-4 text-sm flex gap-2">
             <a href="<?php echo BASE_URL; ?>?act=admin_category_edit&id=<?php echo $category['id'];?>"
            class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs transition">Sửa</a>
+           <a href="<?php echo BASE_URL;?>?act=admin_category_delete&id=<?php echo $category['id']; ?>"
+           onclick="return confirm('Bạn chắc chắn?')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs transition">
+          Xóa</a>
           </td>
           
         </tr>
