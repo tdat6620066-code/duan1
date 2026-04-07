@@ -32,7 +32,7 @@ include './views/components/admin_navbar.php';
             </a>
         </div>
         <div class="max-w-2xl">
-            <h1 class="text-3xl font-bold mb-8">Thêm danh mục mới</h1>
+            <h1 class="text-3xl font-bold mb-8">Cập nhật danh mục</h1>
             <?php if(isset($error)):?>
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
                     <?php echo $error; ?>
@@ -41,12 +41,12 @@ include './views/components/admin_navbar.php';
                 <form action="" method="POST" class="bg-white rounded-lg shadow p-8 space-y-6">
                     <div>
                         <label for="" class="block text-sm font-semibold mb-2">Tên danh mục</label>
-                        <input type="text" name="name" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                        <input type="text" name="name" value="<?php echo $category['name'];?>" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
                     </div>
-                   
+                    
                     <div class="flex gap-4">
                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">
-                            Thêm danh mục
+                            Cập nhật
                         </button>
                         <a href="<?php echo BASE_URL; ?>?act=admin_categories" class="bg-gray-300 hover:bg-gray-400 text-black px-6 py-2 rounded-lg transition">
                             Hủy

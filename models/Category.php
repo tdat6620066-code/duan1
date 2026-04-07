@@ -23,4 +23,10 @@ class Category {
        return $stmt->execute([$data['name']]);
 
     }
+
+    public function update($id, $data){
+        $query = "UPDATE categories SET name = ? WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([$data['name'], $id]);
+    }
 }

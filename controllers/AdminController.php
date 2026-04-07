@@ -162,4 +162,25 @@ class AdminController {
         }
         require_once './views/admin/category_create.php';
     }
+    public function categoryEdit(){
+        $id = (int)$_GET['id'] ?? 0;
+        $category = $this->categoryModel->getById($id);
+        if(!$category){
+            header('Location: ' . BASE_URL . '?act=admin_categories');
+            exit;
+        }
+        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            $data = [
+                'name' => trim($_POST['name']),
+                'description' => trim($_POST['description'])
+            ];
+            if($this->categoryModel->update($id, $data)){
+                header('Location: ' . BASE_URL . '?act=admin_categories');
+                exit;
+            }else {
+                $error = 'Cập nhật danh mục thất bại';
+            }
+        }
+        require_once './views/admin/category_edit.php';
+    }
 }

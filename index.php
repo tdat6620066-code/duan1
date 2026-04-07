@@ -46,4 +46,8 @@ switch ($act) {
         case 'admin_category_create':
             (new AdminController())->categoryCreate();
             break;
+    case 'admin_category_edit':
+        case 'admin_category_edit':
+            (new AdminController())->categoryEdit();
+            break;
 };
