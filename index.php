@@ -8,10 +8,12 @@ require_once './commons/function.php';
 require_once './controllers/HomeController.php';
 require_once './controllers/AuthController.php';
 require_once './controllers/CartController.php';
+require_once './controllers/OrderController.php';
 
 require_once './models/Product.php';
 require_once './models/User.php';
 require_once './models/Cart.php';
+require_once './models/Order.php';
 
 
 
@@ -35,5 +37,19 @@ switch ($act) {
         break;
     case 'cart':
         (new CartController())->index();
+        break;
+    case 'checkout':
+        (new OrderController())->checkout();
+        break;
+    case 'orders':
+        (new OrderController())->index();
+        break;
+    case 'order':
+        $id = $_GET['id'] ?? 0;
+        (new OrderController())->show($id);
+        break;
+    case 'order_cancel':
+        $id = $_GET['id'] ?? 0;
+        (new OrderController())->cancel($id);
         break;
 };
