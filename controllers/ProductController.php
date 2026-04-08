@@ -19,4 +19,5 @@ class ProductController
         $categories = $this->categoryModel->getAll();
         require_once './views/user/products.php';
     }
+
 }

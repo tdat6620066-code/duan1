@@ -5,10 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="public/css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-50">
     <?php include('./views/components/navbar.php'); ?>
+
     <div class="pt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-8">Giỏ hàng của bạn</h1>
@@ -25,59 +29,67 @@
                     </a>
                 </div>
             <?php else: ?>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-">
-                    <div class="lg:col-span-2 space-y-42">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-4">
                         <?php foreach ($cartItems as $item): ?>
                             <div class="bg-white rounded-lg shadow-sm p-6">
-                                <img src="https://via.placeholder.com/100x100?text=<?= urlencode($item['name']) ?>"
-                                    alt="<?= $item['name'] ?>"
-                                    class="w-20 h-20 object-cover rounded-lg">
-                                <div class="flex-1">
-                                    <h3 class="text-lg font-semibold text-gray-900"><?= $item['name'] ?></h3>
-                                    <p class="text-gray-600">Size: <?= $item['size'] ?></p>
-                                    <p class="text-lg font-bold text-blue-600">
-                                        <?= number_format($item['price'], 0, ',', '.') ?>đ
-                                    </p>
-                                </div>
                                 <div class="flex items-center space-x-4">
-                                    <input type="number" value="<?= $item['quantity'] ?>" min="1"
-                                        class="w-16 text-center border border-gray-300 rounded px-2 py-1">
-                                    <button class="text-red-600 hover:text-red-800">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
+                                    <?php
+                                    $imgUrl = $item['image_url'] ?? '';
+                                    if ($imgUrl && !preg_match('/^https?:\/\//i', $imgUrl)) {
+                                        $imgUrl = BASE_URL . $imgUrl;
+                                    }
+                                    ?>
+                                    <img src="<?= $imgUrl ?: 'https://via.placeholder.com/100x100?text=' . urlencode($item['name']) ?>"
+                                        alt="<?= $item['name'] ?>"
+                                        class="w-20 h-20 object-cover rounded-lg">
+                                    <div class="flex-1">
+                                        <h3 class="text-lg font-semibold text-gray-900"><?= $item['name'] ?></h3>
+                                        <p class="text-gray-600">Size: <?= $item['size'] ?></p>
+                                        <p class="text-lg font-bold text-blue-600">
+                                            <?= number_format($item['price'], 0, ',', '.') ?>đ
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-4">
+                                        <input type="number" value="<?= $item['quantity'] ?>" min="1"
+                                            class="w-16 text-center border border-gray-300 rounded px-2 py-1">
+                                        <button class="text-red-600 hover:text-red-800">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+                        <?php endforeach; ?>
                     </div>
-                <?php endforeach; ?>
+
+                    <div class="bg-white rounded-lg shadow-sm p-6 h-fit">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Tóm tắt đơn hàng</h3>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between">
+                                <span>Tạm tính</span>
+                                <span>2,500,000đ</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Phí giao hàng</span>
+                                <span>Miễn phí</span>
+                            </div>
+                        </div>
+                        <div class="border-t pt-4">
+                            <div class="flex justify-between text-lg font-semibold">
+                                <span>Tổng cộng</span>
+                                <span class="text-blue-600">2,500,000đ</span>
+                            </div>
+                        </div>
+                        <a href="?act=checkout"
+                            class="w-full mt-6 bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 block text-center">
+                            Thanh toán
+                        </a>
+                    </div>
                 </div>
-                <div class="bg-white rounded-lg shadow-sm p-6 h-fit">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Tóm tắt đơn hàng</h3>
-                    <div class="space-y-2 mb-4">
-                        <div class="flex justify-between">
-                            <span>Tạm tính</span>
-                            <span>2,500,000đ</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Phí giao hàng</span>
-                            <span>Miễn phí</span>
-                        </div>
-                    </div>
-                    <div class="border-t pt-4">
-                        <div class="flex justify-between text-lg font-semibold">
-                            <span>Tổng cộng</span>
-                            <span class="text-blue-600">2,500,000đ</span>
-                        </div>
-                    </div>
-                    <a href="?act=checkout"
-                        class="w-full mt-6 bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 block text-center">
-                        Thanh toán
-                    </a>
-                </div>
+            <?php endif; ?>
         </div>
-    <?php endif; ?>
-    </div>
     </div>
     <script src="public/js/script.js"></script>
 </body>
