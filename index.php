@@ -18,5 +18,11 @@ switch ($act) {
     case '/':
         (new HomeController())->home();
         break;
-    
+    case 'search':
+        (new ProductController())->search();
+        break;
+    case 'category':
+        $id = $_GET['id'] ?? 0;
+        (new ProductController())->category($id);
+        break;
 };
