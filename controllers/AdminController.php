@@ -185,6 +185,12 @@ class AdminController {
     }
     public function categoryDelete(){
         $id = (int)$_GET['id'] ?? 0;
+        $productCount = $this->productModel->countByCategory($id);
+        if($productCount > 0){
+            $_SESSION['error'] = 'Không thể xóa danh mục vì hiện có ' . $productCount . ' sản phẩm thuộc danh mục này.';
+            header('Location: ' . BASE_URL . '?act=admin_categories');
+            exit;
+        }
         if($this->categoryModel->delete($id)){
             header('Location: ' . BASE_URL . '?act=admin_categories');
             exit;

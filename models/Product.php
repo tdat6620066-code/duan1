@@ -42,10 +42,10 @@ class Product {
         $variantIds = array_column($stmt->fetchAll(), 'id');
         if(!empty($variantIds)){
             $placeholders = implode(',', array_fill(0, count($variantIds), '?' ));
-            $query = "DELETE FROM cart_items WHERE product_variant_id IN ($placeholders";
+            $query = "DELETE FROM cart_items WHERE product_variant_id IN ($placeholders)";
             $stmt = $this->conn->prepare($query);
             $stmt->execute($variantIds);
-            $query = "DELETE FROM order_items WHERE product_variant_id IN ($placeholders";
+            $query = "DELETE FROM order_items WHERE product_variant_id IN ($placeholders)";
             $stmt = $this->conn->prepare($query);
             $stmt->execute($variantIds);
         }
@@ -69,5 +69,12 @@ class Product {
         $this->conn->rollBack();
         return false;
        }
+    }
+
+    public function countByCategory($categoryId){
+        $query = "SELECT COUNT(*) FROM products WHERE category_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$categoryId]);
+        return (int) $stmt->fetchColumn();
     }
 }
