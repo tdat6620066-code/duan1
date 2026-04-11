@@ -57,8 +57,13 @@ switch ($act) {
         case 'admin_category_delete':
             (new AdminController())->categoryDelete();
             break;
-             case 'admin_contacts':
+   case 'admin_contacts':
     case 'admin-contacts':
         (new AdminController())->contacts();
         break;
+         case 'admin_contact_show':
+    case 'admin-contact-show':
+        (new AdminController())->contactShow();
+        break;
+    
 };

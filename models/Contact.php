@@ -30,4 +30,9 @@ class Contact {
         $stmt->execute([$id]);
         return $stmt->fetch();
     }
+public function updateStatus($id, $status){
+    $query = "UPDATE contacts SET status = ? WHERE id = ?";
+    $stmt = $this->conn->prepare($query);
+    return $stmt->execute([$status, $id]);
+}
     }

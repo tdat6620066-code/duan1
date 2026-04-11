@@ -207,4 +207,30 @@ class AdminController {
         $contacts = $this->contactModel->getAll();
         require_once './views/admin/contacts.php';
     }
+    public function contactShow(){
+        $id = (int)($_GET['id'] ?? 0);
+        $contact = $this->contactModel->getById($id);
+        if(!$contact){
+            $_SESSION['error'] = 'Không tìm thấy yêu cầu liên hệ';
+            header('Location: ' . BASE_URL . '?act=admin_contacts');
+            exit;
+        }
+        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            $status = trim($_POST['status'] ?? $contact['status']);
+            $allowed = ['mới', 'đã xử lý', 'đã phản hồi'];
+             if (!in_array($status, $allowed, true)) {
+                $status = 'mới';
+            }
+            if($this->contactModel->updateStatus($id, $status)){
+                $_SESSION['success'] = 'Cập nhật trạng thái liên hệ thành công';
+                header('Location: ' . BASE_URL . '?act=admin_contact_show&id=' . $id);
+                exit;
+            }else {
+                $_SESSION['error'] = 'Cập nhật trạng thái liên hệ thất bại';
+                header('Location: ' . BASE_URL . '?act=admin_contract_show&id' . $id);
+                exit;
+            }
+        }
+        require_once './views/admin/contact_show.php';
+    }
 }
