@@ -61,9 +61,13 @@ switch ($act) {
     case 'admin-contacts':
         (new AdminController())->contacts();
         break;
-         case 'admin_contact_show':
+    case 'admin_contact_show':
     case 'admin-contact-show':
         (new AdminController())->contactShow();
         break;
-    
+    case 'admin_contact_delete':
+    case 'admin-contact-delete':
+        (new AdminController())->contactDelete();
+        break;
+     
 };

@@ -35,4 +35,9 @@ public function updateStatus($id, $status){
     $stmt = $this->conn->prepare($query);
     return $stmt->execute([$status, $id]);
 }
+public function delete($id){
+    $query = "DELETE FROM contacts WHERE id = ?";
+    $stmt = $this->conn->prepare($query);
+    return $stmt->execute([$id]);
+}
     }

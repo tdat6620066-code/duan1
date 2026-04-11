@@ -233,4 +233,14 @@ class AdminController {
         }
         require_once './views/admin/contact_show.php';
     }
+    public function contactDelete(){
+        $id = (int)($_GET['id'] ?? 0);
+        if($this->contactModel->delete($id)){
+            $_SESSION['seccess'] = 'Xóa liên hệ thành công';
+        }else {
+            $_SESSION['error'] = 'Không thể xóa liên hệ ';
+        }
+        header('Location: ' . BASE_URL . '?act=admin_contacts');
+        exit;
+    }
 }
