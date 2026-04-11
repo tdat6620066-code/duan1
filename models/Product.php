@@ -34,8 +34,40 @@ class Product {
         return $stmt->execute([$data['category_id'], $data['name'], $data['description'], $data['price'], $data['image_url'], $id]);
     }
     public function delete($id){
-        $query = "DELETE FROM products WHERE id = ?";
+       try{
+        $this->conn->beginTransaction();
+        $query = "SELECT id FROM product_variants WHERE product_id = ?";
         $stmt = $this->conn->prepare($query);
-        return $stmt->execute([$id]);
+        $stmt->execute([$id]);
+        $variantIds = array_column($stmt->fetchAll(), 'id');
+        if(!empty($variantIds)){
+            $placeholders = implode(',', array_fill(0, count($variantIds), '?' ));
+            $query = "DELETE FROM cart_items WHERE product_variant_id IN ($placeholders";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute($variantIds);
+            $query = "DELETE FROM order_items WHERE product_variant_id IN ($placeholders";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute($variantIds);
+        }
+        // Xóa ảnh sản phẩm nếu có
+        $query = "DELETE FROM product_images WHERE product_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        // Xóa các biến thể trước khi xóa sản phẩm
+        $query = "DELETE FROM product_variants WHERE product_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+
+         $query = "DELETE FROM products WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $result =  $stmt->execute([$id]);
+        
+        $this->conn->commit();
+        return $result;
+
+       }catch(PDOException $e){
+        $this->conn->rollBack();
+        return false;
+       }
     }
 }
