@@ -2,6 +2,7 @@
 class AdminController {
     private $productModel;
     private $categoryModel;
+    private $contactModel;
     public function __construct()
     {
         if(session_status() !== PHP_SESSION_ACTIVE){
@@ -10,6 +11,7 @@ class AdminController {
         $db = connectDB();
         $this->productModel = new Product($db);
         $this->categoryModel = new Category($db);
+        $this->contactModel = new Contact($db);
     }
     public function products() {
         $products = $this->productModel->getAll();
@@ -199,5 +201,10 @@ class AdminController {
             header('Location: ' . BASE_URL . '?act=admin_categories');
             exit;
         }
+    }
+    public function contacts()
+    {
+        $contacts = $this->contactModel->getAll();
+        require_once './views/admin/contacts.php';
     }
 }

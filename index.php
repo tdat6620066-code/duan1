@@ -8,11 +8,14 @@ require_once './commons/function.php'; // Hàm hỗ trợ
 require_once './controllers/HomeController.php';
 require_once './controllers/AdminController.php';
 
+
  session_set_cookie_params(0, '/duan1');
  session_start();
 // Require toàn bộ file Models
 require_once './models/Product.php';
 require_once './models/Category.php';
+
+require_once './models/Contact.php';
 // Route
 $act = $_GET['act'] ?? '/';
 
@@ -54,4 +57,8 @@ switch ($act) {
         case 'admin_category_delete':
             (new AdminController())->categoryDelete();
             break;
+             case 'admin_contacts':
+    case 'admin-contacts':
+        (new AdminController())->contacts();
+        break;
 };
