@@ -35,7 +35,7 @@ class OrderController {
         foreach ($cartItems as $item) {
             $subtotal += $item['price'] * $item['quantity'];
         }
-        $shippingCost = 30000;
+        $shippingCost = SHIPPING_COST;
         $total = $subtotal + $shippingCost;
 
         $error = '';
@@ -127,7 +127,7 @@ class OrderController {
         $orderItems = $this->orderModel->getOrderItems($id);
         require_once './views/user/order_detail.php';
     }
- 
+
     public function cancel($id) {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
@@ -145,7 +145,7 @@ class OrderController {
         }
 
         $status = $order['status'];
-        $notCancelableStatuses = ['shipped', 'delivered', 'cancelled', 'đang giao', 'đã giao', 'đã hủy'];
+        $notCancelableStatuses = ['shipped', 'delivered', 'cancelled', 'đã xác nhận', 'đang giao', 'đã giao', 'đã hủy'];
         if (in_array($status, $notCancelableStatuses, true)) {
             $_SESSION['error'] = 'Đơn hàng không thể hủy ở trạng thái hiện tại.';
             header('Location: ' . BASE_URL . '?act=orders');

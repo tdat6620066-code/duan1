@@ -7,6 +7,7 @@ class Order {
         $this->conn = $db;
     }
 
+    // Lấy tất cả orders
     public function getAll() {
         $query = "SELECT o.*, u.name as user_name, sa.address, sa.city FROM orders o 
                   JOIN users u ON o.user_id = u.id 
@@ -17,6 +18,7 @@ class Order {
         return $stmt->fetchAll();
     }
 
+    // Lấy orders theo user
     public function getByUserId($userId) {
         $query = "SELECT o.*, sa.address, sa.city FROM orders o 
                   JOIN shipping_addresses sa ON o.address_id = sa.id 
@@ -26,6 +28,7 @@ class Order {
         return $stmt->fetchAll();
     }
 
+    // Lấy order theo ID
     public function getById($id) {
         $query = "SELECT o.*, u.name as user_name, sa.address, sa.city FROM orders o 
                   JOIN users u ON o.user_id = u.id 
@@ -37,7 +40,7 @@ class Order {
     }
 
     public function getOrderItems($orderId) {
-        $query = "SELECT oi.*, pv.size, p.name as product_name FROM order_items oi 
+        $query = "SELECT oi.*, pv.size, p.name as product_name, p.image_url FROM order_items oi 
                   JOIN product_variants pv ON oi.product_variant_id = pv.id 
                   JOIN products p ON pv.product_id = p.id 
                   WHERE oi.order_id = ?";
@@ -46,6 +49,7 @@ class Order {
         return $stmt->fetchAll();
     }
 
+    // Tạo order mới từ giỏ hàng
     public function create($userId, $addressId, $cartItems, $shippingFee = 0, $paymentMethod = 'cod') {
         $this->conn->beginTransaction();
         try {
@@ -54,7 +58,6 @@ class Order {
             foreach ($cartItems as $item) {
                 $subtotal += $item['price'] * $item['quantity'];
             }
-
             $total = $subtotal + $shippingFee;
 
             // Tạo order
@@ -63,6 +66,7 @@ class Order {
             $stmt->execute([$userId, $addressId, $total]);
             $orderId = $this->conn->lastInsertId();
 
+            // Thêm order items và giảm stock
             foreach ($cartItems as $item) {
                 $query = "INSERT INTO order_items (order_id, product_variant_id, quantity, price) VALUES (?, ?, ?, ?)";
                 $stmt = $this->conn->prepare($query);
@@ -76,6 +80,7 @@ class Order {
                 }
             }
 
+            // Tạo thông tin thanh toán
             $paymentStatus = 'pending';
             $query = "INSERT INTO payments (order_id, method, status) VALUES (?, ?, ?)";
             $stmt = $this->conn->prepare($query);
@@ -89,6 +94,7 @@ class Order {
         }
     }
 
+    // Cập nhật trạng thái order
     public function updateStatus($id, $status) {
         $query = "UPDATE orders SET status = ? WHERE id = ?";
         $stmt = $this->conn->prepare($query);
