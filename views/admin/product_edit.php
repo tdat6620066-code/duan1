@@ -9,7 +9,7 @@ include './views/components/admin_navbar.php';
                <i class="fas fa-arrow-left"></i> Quay lại
             </a>
         </div>
-        <div class="max-w-2xl">
+        <div class="max-w-4xl mx-auto">
             <h1 class="text-3xl font-bold mb-8">Cập nhật sản phẩm</h1>
             <?php if(isset($error)): ?>
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
@@ -49,9 +49,30 @@ include './views/components/admin_navbar.php';
                     </div>
                     <div>
                          <label for="" class="block text-sm font-semibold mb-2">URL Hình ảnh (hoặc tải lên)</label>
-                         <input type="text" name="image_url" placeholder="https://..." class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                          <input type="text" name="image_url" placeholder="https://..." class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-2" value="<?= htmlspecialchars($product['image_url'] ?? '') ?>">
                          <input type="file" name="image" id="" accept="image/*" class="w-full">
+                           <img src="<?php echo BASE_URL . $product['image_url'] ;?>" alt="<?php echo $product['name'];?>" class="w-16 h-16 object-cover rounded" style="min-width: 200px; min-height: 200px;">
                     </div>
+                    <?php if(!empty($variants)):?>
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <h2 class="text-lg font-semibold mb-4">Tồn kho theo size</h2>
+                            <div class="space-y-4">
+                                <?php foreach($variants as $variant):?>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                                        <div>
+                                            <label for="" class="block text-sm font-semibold mb-2">Size</label>
+                                            <input type="text" value="<?=  htmlspecialchars($variant['size']) ?>" disabled class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white">
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label for="" class="block text-sm font-semibold mb-2">Số lượng</label>
+                                            <input type="number" name="variant_stock[<?=  $variant['id'] ?>]" value="<?=  htmlspecialchars($variant['stock']) ?>" min="0"  class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white">
+                                        </div>
+                                    </div>
+                                    <?php endforeach;?>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-3">Cập nhật số lượng tồn kho từng size của sản phẩm</p>
+                        </div>
+                        <?php endif;?>
                     <div class="flex gap-4">
                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">
                            Cập nhật

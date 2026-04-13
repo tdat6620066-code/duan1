@@ -14,7 +14,7 @@ require_once './controllers/AdminController.php';
 // Require toàn bộ file Models
 require_once './models/Product.php';
 require_once './models/Category.php';
-
+require_once './models/ProductVariant.php';
 require_once './models/Contact.php';
 // Route
 $act = $_GET['act'] ?? '/';

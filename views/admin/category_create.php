@@ -9,7 +9,7 @@ include './views/components/admin_navbar.php';
                 <i class="fas fa-arrow-left"></i> Quay lại
             </a>
         </div>
-        <div class="max-w-2xl">
+        <div class="max-w-4xl mx-auto">
             <h1 class="text-3xl font-bold mb-8">Thêm danh mục mới</h1>
             <?php if(isset($error)):?>
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">

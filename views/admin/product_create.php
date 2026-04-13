@@ -9,7 +9,7 @@ include './views/components/admin_navbar.php';
                <i class="fas fa-arrow-left"></i> Quay lại
             </a>
         </div>
-        <div class="max-w-2xl">
+        <div class="max-w-4xl mx-auto">
             <h1 class="text-3xl font-bold mb-8">Thêm sản phẩm mới</h1>
             <?php if(isset($error)): ?>
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
@@ -42,6 +42,19 @@ include './views/components/admin_navbar.php';
                          <label for="" class="block text-sm font-semibold mb-2">URL Hình ảnh (hoặc tải lên)</label>
                          <input type="text" name="image_url" placeholder="https://..." class="w-full border border-gray-300 rounded-lg px-4 py-2">
                          <input type="file" name="image" id="" accept="image/*" class="w-full">
+                    </div>
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <h2 class="text-lg font-semibold mb-4">Tồn kho theo size</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <?php $defaultSizes = [38, 39, 40, 41, 42];?>
+                            <?php foreach ($defaultSizes as $size):?>
+                                <div>
+                                    <label for="" class="block text-sm font-semibold mb-2">Size <?=  $size ?> </label>
+                                    <input type="number" name="stock_<?= $size ?>" value="10" min="0" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                                </div>
+                                <?php endforeach;?>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-3">Điền số lượng tồn kho cho từng size, nếu để trống sẽ mặc định 10.</p>
                     </div>
                     <div class="flex gap-4">
                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">

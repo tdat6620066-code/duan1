@@ -71,7 +71,22 @@ class AdminController {
                 'price' => (float)$_POST['price'],
                 'image_url' => $imageUrl
             ];
-            if($this->productModel->create($data)){
+            $db = connectDB();
+            $productModel = new Product($db);
+            $variantModel = new ProductVariant($db);
+            $result = $productModel->create($data);
+            if($result){
+                $productId = $db->lastInsertId();
+                $defaultSizes = [38, 39, 40, 41, 42];
+                foreach($defaultSizes as $size){
+                    $stockValue = max(0, intval($_POST['stock_' . $size] ?? 10));
+                    $variantModel->create([
+                        'product_id' => $productId,
+                        'size' => $size,
+                        'stock' => $stockValue
+                    ]);
+                }
+            
                 header('Location: ' . BASE_URL . '?act=admin_products');
                 exit;
             }else {
@@ -89,6 +104,8 @@ class AdminController {
             header('Location: ' . BASE_URL . '?act=admin_products');
             exit;
         }
+        $variantModel = new ProductVariant(connectDB());
+        $variants = $variantModel->getByProductId($id);
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
             $error = '';
             $category_id = (int)($_POST['category_id'] ?? 0);
@@ -124,6 +141,14 @@ class AdminController {
                     'image_url' => $imageUrl,
                 ];
                 if($this->productModel->update($id, $data)){
+                    foreach($variants as $variant){
+                        $stockValues = $_POST['variant_stock'] ?? [];
+                        $stockValue = max(0, intval($stockValues[$variant['id']] ?? $variant['stock']));
+                        $variantModel->update($variant['id'], [
+                            'size' => $variant['size'],
+                            'stock' => $stockValue
+                        ]);
+                    }
                     header('Location: ' . BASE_URL . '?act=admin_products');
                     exit;
                 }else {
