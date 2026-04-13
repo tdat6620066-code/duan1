@@ -3,33 +3,7 @@ include './views/components/admin_navbar.php';
 ?>
 
 <div class="flex pt-16">
-    <div class="w-1/5 bg-gray-900 text-white p-6 min-h-screen">
-        <div class="mb-12">
-            <h2 class="text-sm font-semibold text-gray-400 mb-6">MENU CHÍNH</h2>
-            <a href="<?php echo BASE_URL; ?>?act=admin" class="flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition">
-                <i class="fas fa-chart-line"></i> Dashboard
-            </a>
-            <a href="<?php echo BASE_URL; ?>" class="flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition">
-                <i class="fas fa-home"></i> Trang chủ
-            </a>
-        </div>
-
-        <div>
-            <h2 class="text-sm font-semibold text-gray-400 mb-6">QUẢN LÝ</h2>
-            <a href="<?php echo BASE_URL; ?>?act=admin_products" class="flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition">
-                <i class="fas fa-box"></i> Sản phẩm
-            </a>
-            <a href="<?php echo BASE_URL; ?>?act=admin_categories" class="flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition">
-                <i class="fas fa-tag"></i> Danh mục
-            </a>
-            <a href="<?php echo BASE_URL; ?>?act=admin_users" class="flex items-center gap-3 px-4 py-3 rounded hover:bg-gray-800 transition">
-                <i class="fas fa-users"></i> Người dùng
-            </a>
-            <a href="<?php echo BASE_URL; ?>?act=admin_orders" class="flex items-center gap-3 px-4 py-3 rounded bg-blue-600">
-                <i class="fas fa-shopping-cart"></i> Đơn hàng
-            </a>
-        </div>
-    </div>
+    <?php include './views/admin/admin_sidebar.php'; ?>
 
     <div class="w-4/5 p-8">
         <div class="mb-8">
@@ -91,15 +65,16 @@ include './views/components/admin_navbar.php';
                     <div class="flex gap-3 items-end">
                         <div class="flex-1">
                             <label class="block text-sm font-semibold mb-2">Cập nhật trạng thái</label>
-                            <select name="status" class="w-full border border-gray-300 rounded-lg px-4 py-2">
-                                <option value="chờ xác nhận" <?php echo $order['status'] === 'chờ xác nhận' ? 'selected' : ''; ?>>Chờ xác nhận</option>
-                                <option value="đã xác nhận" <?php echo $order['status'] === 'đã xác nhận' ? 'selected' : ''; ?>>Đã xác nhận</option>
-                                <option value="đang giao" <?php echo $order['status'] === 'đang giao' ? 'selected' : ''; ?>>Đang giao</option>
-                                <option value="đã giao" <?php echo $order['status'] === 'đã giao' ? 'selected' : ''; ?>>Đã giao</option>
-                                <option value="đã hủy" <?php echo $order['status'] === 'đã hủy' ? 'selected' : ''; ?>>Đã hủy</option>
+                            <select name="status" class="w-full border border-gray-300 rounded-lg px-4 py-2" <?php echo empty($nextStatuses) ? 'disabled' : ''; ?>>
+                                <option value="<?php echo htmlspecialchars($order['status']); ?>" selected disabled>
+                                    <?php echo $status_map[$order['status']] ?? $order['status']; ?> (hiện tại)
+                                </option>
+                                <?php foreach ($nextStatuses as $nextStatus): ?>
+                                    <option value="<?= htmlspecialchars($nextStatus) ?>"><?= $status_map[$nextStatus] ?? $nextStatus ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
-                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition" <?php echo empty($nextStatuses) ? 'disabled' : ''; ?>>
                             Cập nhật
                         </button>
                     </div>
@@ -200,15 +175,6 @@ include './views/components/admin_navbar.php';
                 </div>
             </div>
             <?php endif; ?>
-
-            <!-- Delete Button -->
-            <div class="flex justify-end">
-                <a href="<?php echo BASE_URL; ?>?act=admin_order_delete&id=<?php echo $order['id']; ?>" 
-                   onclick="return confirm('Bạn chắc chắn muốn xóa đơn hàng này?')"
-                   class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition">
-                    Xóa đơn hàng
-                </a>
-            </div>
         </div>
     </div>
 </div>
