@@ -1,16 +1,13 @@
 <?php
 
-class Order
-{
+class Order {
     private $conn;
 
-    public function __construct($db)
-    {
+    public function __construct($db) {
         $this->conn = $db;
     }
 
-    public function getAll()
-    {
+    public function getAll() {
         $query = "SELECT o.*, u.name as user_name, sa.address, sa.city FROM orders o 
                   JOIN users u ON o.user_id = u.id 
                   JOIN shipping_addresses sa ON o.address_id = sa.id 
@@ -20,8 +17,8 @@ class Order
         return $stmt->fetchAll();
     }
 
-    public function getByUserId($userId)
-    {
+    // Lấy orders theo user
+    public function getByUserId($userId) {
         $query = "SELECT o.*, sa.address, sa.city FROM orders o 
                   JOIN shipping_addresses sa ON o.address_id = sa.id 
                   WHERE o.user_id = ? ORDER BY o.created_at DESC";
@@ -30,8 +27,8 @@ class Order
         return $stmt->fetchAll();
     }
 
-    public function getById($id)
-    {
+    // Lấy order theo ID
+    public function getById($id) {
         $query = "SELECT o.*, u.name as user_name, sa.address, sa.city FROM orders o 
                   JOIN users u ON o.user_id = u.id 
                   JOIN shipping_addresses sa ON o.address_id = sa.id 
@@ -41,9 +38,8 @@ class Order
         return $stmt->fetch();
     }
 
-    public function getOrderItems($orderId)
-    {
-        $query = "SELECT oi.*, pv.size, p.name as product_name FROM order_items oi 
+    public function getOrderItems($orderId) {
+        $query = "SELECT oi.*, pv.size, p.name as product_name, p.image_url FROM order_items oi 
                   JOIN product_variants pv ON oi.product_variant_id = pv.id 
                   JOIN products p ON pv.product_id = p.id 
                   WHERE oi.order_id = ?";
@@ -52,8 +48,8 @@ class Order
         return $stmt->fetchAll();
     }
 
-    public function create($userId, $addressId, $cartItems, $shippingFee = 0, $paymentMethod = 'cod')
-    {
+    // Tạo order mới từ giỏ hàng
+    public function create($userId, $addressId, $cartItems, $shippingFee = 0, $paymentMethod = 'cod') {
         $this->conn->beginTransaction();
         try {
             // Tính tổng tiền sản phẩm
@@ -96,16 +92,21 @@ class Order
             return false;
         }
     }
-    public function updateStatus($id, $status)
-    {
+
+    // Cập nhật trạng thái order
+    public function updateStatus($id, $status) {
         $query = "UPDATE orders SET status = ? WHERE id = ?";
         $stmt = $this->conn->prepare($query);
         return $stmt->execute([$status, $id]);
     }
     public function delete($id)
     {
+
+    // Xóa order
+    public function delete($id) {
         $query = "DELETE FROM orders WHERE id = ?";
         $stmt = $this->conn->prepare($query);
         return $stmt->execute([$id]);
     }
+}
 }
