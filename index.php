@@ -68,9 +68,7 @@ switch ($act) {
         $id = $_GET['id'] ?? 0;
         (new OrderController())->cancel($id);
         break;
-};
-   
-    case 'admin_products':
+     case 'admin_products':
     case 'admin-products';
         (new AdminController())->products();
         break;
@@ -154,3 +152,5 @@ switch ($act) {
         (new AdminController())->dashboard();
         break;   
 };
+   
+   
