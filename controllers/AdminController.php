@@ -268,4 +268,89 @@ class AdminController {
         header('Location: ' . BASE_URL . '?act=admin_contacts');
         exit;
     }
+    public function dashboard() {
+        $db = connectDB();
+        
+        // Get statistics
+        $stats = [];
+        // Total revenue
+        $query = "SELECT SUM(total_price) as total_revenue FROM orders";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        $stats['total_revenue'] = $stmt->fetch()['total_revenue'] ?? 0;
+
+        // Total orders
+        $query = "SELECT COUNT(*) as total_orders FROM orders";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        $stats['total_orders'] = $stmt->fetch()['total_orders'] ?? 0;
+
+        // Total products
+        $query = "SELECT COUNT(*) as total_products FROM products";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        $stats['total_products'] = $stmt->fetch()['total_products'] ?? 0;
+
+        // Total users
+        $query = "SELECT COUNT(*) as total_users FROM users WHERE role_id = 2";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        $stats['total_users'] = $stmt->fetch()['total_users'] ?? 0;
+
+        // Top selling products
+        $query = "SELECT p.id, p.name, COALESCE(SUM(oi.quantity), 0) as quantity_sold, COALESCE(SUM(oi.price * oi.quantity), 0) as revenue 
+                  FROM products p 
+                  LEFT JOIN product_variants pv ON pv.product_id = p.id
+                  LEFT JOIN order_items oi ON oi.product_variant_id = pv.id
+                  GROUP BY p.id, p.name
+                  ORDER BY quantity_sold DESC
+                  LIMIT 5";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        $stats['top_products'] = $stmt->fetchAll();
+
+        // Recent orders
+        $query = "SELECT o.*, u.name as user_name FROM orders o 
+                  JOIN users u ON o.user_id = u.id 
+                  ORDER BY o.created_at DESC LIMIT 10";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        $stats['recent_orders'] = $stmt->fetchAll();
+
+        // Revenue history for chart (last 7 days)
+        $startDate = date('Y-m-d', strtotime('-6 days'));
+        $endDate = date('Y-m-d');
+        $query = "SELECT DATE(created_at) as order_date, SUM(total_price) as total_revenue 
+                  FROM orders 
+                  WHERE DATE(created_at) BETWEEN ? AND ? 
+                  GROUP BY DATE(created_at) 
+                  ORDER BY DATE(created_at) ASC";
+                  $stmt = $db->prepare($query);
+        $stmt->execute([$startDate, $endDate]);
+        $revenueRows = $stmt->fetchAll();
+        $revenueMap = [];
+        foreach ($revenueRows as $row) {
+            $revenueMap[$row['order_date']] = (float)$row['total_revenue'];
+        }
+
+        $stats['revenue_history'] = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-{$i} days"));
+            $stats['revenue_history'][] = [
+                'date' => $date,
+                'revenue' => $revenueMap[$date] ?? 0
+            ];
+        }
+
+        // Order status counts for chart
+        $query = "SELECT status, COUNT(*) as count FROM orders GROUP BY status";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        $stats['order_status_counts'] = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $stats['order_status_counts'][$row['status']] = (int)$row['count'];
+        }
+
+        require_once './views/admin/dashboard.php';
+    }
 }
