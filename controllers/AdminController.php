@@ -353,4 +353,234 @@ class AdminController {
 
         require_once './views/admin/dashboard.php';
     }
+
+    // User Management
+    public function users() {
+        $db = connectDB();
+        
+        $query = "SELECT u.*, r.name as role_name FROM users u 
+                  JOIN roles r ON u.role_id = r.id 
+                  ORDER BY u.id DESC";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        $users = $stmt->fetchAll();
+        
+        require_once './views/admin/users.php';
+    }
+
+    public function userEdit() {
+        $id = (int)$_GET['id'] ?? 0;
+        $user = $this->userModel->getById($id);
+        
+        if (!$user) {
+            header('Location: ' . BASE_URL . '?act=admin_users');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'id' => $id,
+                'name' => trim($_POST['name']),
+                'email' => trim($_POST['email']),
+                'phone' => trim($_POST['phone']),
+                'role_id' => (int)$_POST['role_id']
+            ];
+
+            $query = "UPDATE users SET name = ?, email = ?, phone = ?, role_id = ? WHERE id = ?";
+            $db = connectDB();
+            $stmt = $db->prepare($query);
+            if ($stmt->execute([$data['name'], $data['email'], $data['phone'], $data['role_id'], $id])) {
+                header('Location: ' . BASE_URL . '?act=admin_users');
+                exit;
+            } else {
+                $error = 'Cập nhật người dùng thất bại';
+            }
+        }
+
+        $db = connectDB();
+        $query = "SELECT * FROM roles";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        $roles = $stmt->fetchAll();
+
+        require_once './views/admin/user_edit.php';
+    }
+
+    public function userDelete() {
+        $id = (int)$_GET['id'] ?? 0;
+        
+        // Prevent deleting yourself
+        if ($id === $_SESSION['user']['id']) {
+            $_SESSION['error'] = 'Không thể xóa chính mình';
+            header('Location: ' . BASE_URL . '?act=admin_users');
+            exit;
+        }
+
+        $query = "DELETE FROM users WHERE id = ? AND role_id != 1";
+        $db = connectDB();
+        $stmt = $db->prepare($query);
+        if ($stmt->execute([$id])) {
+            header('Location: ' . BASE_URL . '?act=admin_users');
+            exit;
+        } else {
+            $_SESSION['error'] = 'Không thể xóa người dùng';
+            header('Location: ' . BASE_URL . '?act=admin_users');
+            exit;
+        }
+    }
+
+    // Order Management
+    public function orders() {
+        $db = connectDB();
+        
+        $query = "SELECT o.*, u.name as user_name, u.email as user_email FROM orders o 
+                  JOIN users u ON o.user_id = u.id 
+                  ORDER BY o.created_at DESC";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        $orders = $stmt->fetchAll();
+        
+        require_once './views/admin/orders.php';
+    }
+
+    private function getOrderStatusTransitions() {
+        return [
+            'chờ xác nhận' => ['đã xác nhận', 'đã hủy'],
+            'đã xác nhận' => ['đang giao', 'đã hủy'],
+            'đang giao' => ['đã giao'],
+            'đã giao' => [],
+            'đã hủy' => []
+        ];
+    }
+
+    public function orderShow() {
+        $id = (int)$_GET['id'] ?? 0;
+        $db = connectDB();
+        
+        // Get order info
+        $query = "SELECT o.*, u.name as user_name, u.email as user_email, u.phone as user_phone FROM orders o 
+                  JOIN users u ON o.user_id = u.id 
+                  WHERE o.id = ?";
+        $stmt = $db->prepare($query);
+        $stmt->execute([$id]);
+        $order = $stmt->fetch();
+        
+        if (!$order) {
+            header('Location: ' . BASE_URL . '?act=admin_orders');
+            exit;
+        }
+
+        // Get order items
+        $query = "SELECT oi.*, pv.size, p.name as product_name FROM order_items oi 
+                  JOIN product_variants pv ON oi.product_variant_id = pv.id 
+                  JOIN products p ON pv.product_id = p.id 
+                  WHERE oi.order_id = ?";
+        $stmt = $db->prepare($query);
+        $stmt->execute([$id]);
+        $order_items = $stmt->fetchAll();
+
+        // Get shipping address
+        $query = "SELECT * FROM shipping_addresses WHERE id = ?";
+        $stmt = $db->prepare($query);
+        $stmt->execute([$order['address_id']]);
+        $shipping_address = $stmt->fetch();
+
+        // Get payment info
+        $query = "SELECT * FROM payments WHERE order_id = ?";
+        $stmt = $db->prepare($query);
+        $stmt->execute([$id]);
+        $payment = $stmt->fetch();
+        
+        $statusTransitions = $this->getOrderStatusTransitions();
+        $currentStatus = $order['status'];
+        $nextStatuses = $statusTransitions[$currentStatus] ?? [];
+
+        require_once './views/admin/order_show.php';
+    }
+
+    public function orderUpdateStatus() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $order_id = (int)$_POST['order_id'];
+            $status = trim(mb_strtolower($_POST['status']));
+            $statusMap = [
+                'pending' => 'chờ xác nhận',
+                'confirmed' => 'đã xác nhận',
+                'shipped' => 'đang giao',
+                'delivered' => 'đã giao',
+                'cancelled' => 'đã hủy',
+                'chờ xác nhận' => 'chờ xác nhận',
+                'đã xác nhận' => 'đã xác nhận',
+                'đang giao' => 'đang giao',
+                'đã giao' => 'đã giao',
+                'đã hủy' => 'đã hủy'
+            ];
+
+            $status = $statusMap[$status] ?? null;
+            if ($status === null) {
+                $status = 'chờ xác nhận';
+            }
+
+            $db = connectDB();
+            $query = "SELECT status FROM orders WHERE id = ?";
+            $stmt = $db->prepare($query);
+            $stmt->execute([$order_id]);
+            $currentOrder = $stmt->fetch();
+
+            if (!$currentOrder) {
+                $_SESSION['error'] = 'Đơn hàng không tồn tại.';
+                header('Location: ' . BASE_URL . '?act=admin_orders');
+                exit;
+            }
+
+            $currentStatus = $currentOrder['status'];
+            $allowedTransitions = $this->getOrderStatusTransitions();
+            $allowedNext = $allowedTransitions[$currentStatus] ?? [];
+
+            if (!in_array($status, $allowedNext, true)) {
+                $_SESSION['error'] = 'Không thể chuyển trạng thái từ "' . $currentStatus . '" sang "' . $status . '".';
+                header('Location: ' . BASE_URL . '?act=admin_order_show&id=' . $order_id);
+                exit;
+            }
+
+            $query = "UPDATE orders SET status = ? WHERE id = ?";
+            $stmt = $db->prepare($query);
+
+            if ($stmt->execute([$status, $order_id])) {
+                $_SESSION['success'] = 'Cập nhật trạng thái thành công';
+                header('Location: ' . BASE_URL . '?act=admin_order_show&id=' . $order_id);
+                exit;
+            } else {
+                $_SESSION['error'] = 'Cập nhật trạng thái thất bại';
+                header('Location: ' . BASE_URL . '?act=admin_order_show&id=' . $order_id);
+                exit;
+            }
+        }
+    }
+
+    public function orderDelete() {
+        $id = (int)$_GET['id'] ?? 0;
+        $db = connectDB();
+        
+        // Delete cascading
+        $query = "DELETE FROM order_items WHERE order_id = ?";
+        $stmt = $db->prepare($query);
+        $stmt->execute([$id]);
+        
+        $query = "DELETE FROM payments WHERE order_id = ?";
+        $stmt = $db->prepare($query);
+        $stmt->execute([$id]);
+        
+        $query = "DELETE FROM orders WHERE id = ?";
+        $stmt = $db->prepare($query);
+        
+        if ($stmt->execute([$id])) {
+            $_SESSION['success'] = 'Xóa đơn hàng thành công';
+            header('Location: ' . BASE_URL . '?act=admin_orders');
+            exit;
+        } else {
+            $_SESSION['error'] = 'Không thể xóa đơn hàng';
+            header('Location: ' . BASE_URL . '?act=admin_orders');
+            exit;
+        }
+    }
 }
