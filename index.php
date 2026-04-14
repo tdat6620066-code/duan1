@@ -18,7 +18,7 @@ require_once './models/Order.php';
 
 
 require_once './controllers/AdminController.php';
-require_once './controllers/OrderController.php';
+
 
 
  session_set_cookie_params(0, '/duan1');
