@@ -7,7 +7,6 @@ class Order {
         $this->conn = $db;
     }
 
-    // Lấy tất cả orders
     public function getAll() {
         $query = "SELECT o.*, u.name as user_name, sa.address, sa.city FROM orders o 
                   JOIN users u ON o.user_id = u.id 
@@ -100,6 +99,8 @@ class Order {
         $stmt = $this->conn->prepare($query);
         return $stmt->execute([$status, $id]);
     }
+    public function delete($id)
+    {
 
     // Xóa order
     public function delete($id) {
@@ -107,4 +108,5 @@ class Order {
         $stmt = $this->conn->prepare($query);
         return $stmt->execute([$id]);
     }
+}
 }
