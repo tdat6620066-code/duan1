@@ -12,4 +12,5 @@ define('DB_USERNAME', 'root');
 define('DB_PASSWORD', '');
 define('DB_NAME'    , 'shop_db');
 
+define('SHIPPING_COST', 30000);
 define('PATH_ROOT'    , __DIR__ . '/../');

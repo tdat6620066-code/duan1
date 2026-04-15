@@ -20,13 +20,18 @@ require_once './models/Order.php';
 require_once './controllers/AdminController.php';
 
 
+
  session_set_cookie_params(0, '/duan1');
  session_start();
 // Require toàn bộ file Models
 require_once './models/Product.php';
 require_once './models/Category.php';
+require_once './models/Order.php';
+require_once './models/User.php';
+require_once './models/ShippingAddress.php';
 require_once './models/ProductVariant.php';
 require_once './models/Contact.php';
+require_once './models/Payment.php';
 // Route
 $act = $_GET['act'] ?? '/';
 
@@ -68,7 +73,8 @@ switch ($act) {
         break;
 };
    
-    case 'admin_products':
+  
+     case 'admin_products':
     case 'admin-products';
         (new AdminController())->products();
         break;
@@ -112,5 +118,45 @@ switch ($act) {
     case 'admin-contact-delete':
         (new AdminController())->contactDelete();
         break;
-     
+    // Orders
+    
+    case 'admin_user_delete':
+    case 'admin-user-delete':
+        (new AdminController())->userDelete();
+        break;
+    
+     case 'admin_users':
+    case 'admin-users':
+        (new AdminController())->users();
+        break;
+    
+    case 'admin_user_edit':
+    case 'admin-user-edit':
+        (new AdminController())->userEdit();
+        break;
+    
+    case 'admin_orders':
+    case 'admin-orders':
+        (new AdminController())->orders();
+        break;
+    
+    case 'admin_order_show':
+    case 'admin-order-show':
+        (new AdminController())->orderShow();
+        break;
+    
+    case 'admin_order_update_status':
+    case 'admin-order-update-status':
+        (new AdminController())->orderUpdateStatus();
+        break;
+    
+    case 'admin_order_delete':
+    case 'admin-order-delete':
+        (new AdminController())->orderDelete();
+        break;
+    case 'admin':
+        (new AdminController())->dashboard();
+        break;   
 };
+   
+   
