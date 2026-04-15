@@ -61,4 +61,35 @@ class AuthController
         header('Location:' . BASE_URL);
         exit;
     }
+
+       public function profile() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASE_URL . '?act=login');
+            exit;
+        }
+
+        $userId = $_SESSION['user']['id'];
+        $user = $this->userModel->getById($userId);
+        $success = '';
+        $error = '';
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'role_id' => $user['role_id'],
+                'name' => trim($_POST['name'] ?? $user['name']),
+                'email' => trim($_POST['email'] ?? $user['email']),
+                'phone' => trim($_POST['phone'] ?? $user['phone'])
+            ];
+
+            if ($this->userModel->update($userId, $data)) {
+                $success = 'Cập nhật thông tin thành công';
+                $_SESSION['user'] = $this->userModel->getById($userId);
+                $user = $_SESSION['user'];
+            } else {
+                $error = 'Cập nhật thông tin thất bại';
+            }
+        }
+
+        require_once './views/user/profile.php';
+    }
 }
