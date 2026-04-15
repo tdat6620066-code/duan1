@@ -63,6 +63,9 @@ switch ($act) {
         $id = $_GET['id'] ?? 0;
         (new OrderController())->cancel($id);
         break;
+    case 'profile':
+        (new AuthController())->profile();
+        break;
 };
    
     case 'admin_products':
