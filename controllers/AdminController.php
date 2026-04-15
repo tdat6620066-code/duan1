@@ -3,6 +3,8 @@ class AdminController {
     private $productModel;
     private $categoryModel;
     private $contactModel;
+    private $userModel;
+    private $orderModel;
     public function __construct()
     {
         if(session_status() !== PHP_SESSION_ACTIVE){
@@ -12,6 +14,8 @@ class AdminController {
         $this->productModel = new Product($db);
         $this->categoryModel = new Category($db);
         $this->contactModel = new Contact($db);
+        $this->userModel = new User($db);
+        $this->orderModel = new Order($db);
     }
     public function products() {
         $products = $this->productModel->getAll();
