@@ -9,13 +9,13 @@ require_once './controllers/HomeController.php';
 require_once './controllers/AuthController.php';
 require_once './controllers/CartController.php';
 require_once './controllers/OrderController.php';
+require_once './controllers/ProductController.php';
 
-require_once './models/Product.php';
-require_once './models/User.php';
+
+
+
+
 require_once './models/Cart.php';
-require_once './models/Order.php';
-
-
 
 
 require_once './controllers/AdminController.php';
