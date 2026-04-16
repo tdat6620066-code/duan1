@@ -6,13 +6,23 @@ class Product {
         $this->conn = $db;
     }
     public function getAll(){
-        $query = "SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id ORDER BY p.created_at DESC";
+          $query = "SELECT p.*, c.name as category_name, COALESCE(SUM(pv.stock), 0) as total_stock 
+                  FROM products p 
+                  JOIN categories c ON p.category_id = c.id 
+                  LEFT JOIN product_variants pv ON pv.product_id = p.id 
+                  GROUP BY p.id, c.name 
+                  ORDER BY p.created_at DESC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll();
     }
     public function getById($id){
-        $query = "SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.id = ?";
+        $query = "SELECT p.*, c.name as category_name, COALESCE(SUM(pv.stock), 0) as total_stock 
+                  FROM products p 
+                  JOIN categories c ON p.category_id = c.id 
+                  LEFT JOIN product_variants pv ON pv.product_id = p.id 
+                  WHERE p.id = ? 
+                  GROUP BY p.id, c.name";
         $stmt = $this->conn->prepare($query);
         $stmt->execute([$id]);
         return $stmt->fetch();

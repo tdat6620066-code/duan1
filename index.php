@@ -10,10 +10,6 @@ require_once './controllers/AuthController.php';
 require_once './controllers/CartController.php';
 require_once './controllers/OrderController.php';
 
-require_once './models/Product.php';
-require_once './models/User.php';
-require_once './models/Cart.php';
-require_once './models/Order.php';
 
 
 
@@ -31,6 +27,7 @@ require_once './models/User.php';
 require_once './models/ShippingAddress.php';
 require_once './models/ProductVariant.php';
 require_once './models/Contact.php';
+require_once './models/Cart.php';
 
 // Route
 $act = $_GET['act'] ?? '/';
