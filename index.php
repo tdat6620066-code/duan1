@@ -71,7 +71,6 @@ switch ($act) {
     case 'profile':
         (new AuthController())->profile();
         break;
-};
    
   
      case 'admin_products':
