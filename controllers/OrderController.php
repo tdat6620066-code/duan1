@@ -151,7 +151,27 @@ class OrderController {
             exit;
         }
 
-        $_SESSION['error'] = 'Bạn không được phép xóa đơn hàng.';
+        $userId = $_SESSION['user']['id'];
+        $order = $this->orderModel->getById($id);
+
+        if (!$order || $order['user_id'] != $userId) {
+            $_SESSION['error'] = 'Đơn hàng không tồn tại hoặc bạn không có quyền thực hiện.';
+            header('Location: ' . BASE_URL . '?act=orders');
+            exit;
+        }
+
+        if (in_array($order['status'], ['đang giao', 'đã giao'])) {
+            $_SESSION['error'] = 'Không thể xóa đơn hàng đã được giao hoặc đang giao.';
+            header('Location: ' . BASE_URL . '?act=orders');
+            exit;
+        }
+
+        if ($this->orderModel->delete($id)) {
+            $_SESSION['success'] = 'Đơn hàng đã được xóa thành công.';
+        } else {
+            $_SESSION['error'] = 'Xóa đơn hàng thất bại. Vui lòng thử lại.';
+        }
+
         header('Location: ' . BASE_URL . '?act=orders');
         exit;
     }

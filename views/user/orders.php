@@ -86,6 +86,11 @@
                                     <a href="?act=order&id=<?= $order['id'] ?>" class="text-blue-600 hover:text-blue-800 font-medium">
                                         Xem chi tiết →
                                     </a>
+                                    <?php if (!in_array($order['status'], ['đang giao', 'đã giao'])): ?>
+                                        <a href="?act=order_delete&id=<?= $order['id'] ?>" class="text-red-600 hover:text-red-800 font-medium" onclick="return confirm('Bạn có chắc muốn xóa đơn hàng này?');">
+                                            Xóa đơn hàng
+                                        </a>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>

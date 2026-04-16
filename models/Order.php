@@ -99,9 +99,27 @@ class Order {
 
     
     public function delete($id) {
-        $query = "DELETE FROM orders WHERE id = ?";
-        $stmt = $this->conn->prepare($query);
-        return $stmt->execute([$id]);
+        try {
+            $this->conn->beginTransaction();
+
+            $query = "DELETE FROM order_items WHERE order_id = ?";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([$id]);
+
+            $query = "DELETE FROM payments WHERE order_id = ?";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([$id]);
+
+            $query = "DELETE FROM orders WHERE id = ?";
+            $stmt = $this->conn->prepare($query);
+            $result = $stmt->execute([$id]);
+
+            $this->conn->commit();
+            return $result;
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            return false;
+        }
     }
 }
 
