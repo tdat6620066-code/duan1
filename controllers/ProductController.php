@@ -19,5 +19,28 @@ class ProductController
         $categories = $this->categoryModel->getAll();
         require_once './views/user/products.php';
     }
+    
+    public function show($id) {
+        $product = $this->productModel->getById($id);
+        if (!$product) {
+            header('Location: ' . BASE_URL . 'products');
+            exit;
+        }
+        $variants = $this->variantModel->getByProductId($id);
+        require_once './views/user/product_detail.php';
+    }
 
+    public function search() {
+        $keyword = trim($_GET['q'] ?? '');
+        $products = $this->productModel->search($keyword);
+        $categories = $this->categoryModel->getAll();
+        $searchQuery = $keyword;
+        require_once './views/user/products.php';
+    }
+
+    public function category($categoryId) {
+        $products = $this->productModel->getByCategory($categoryId);
+        $categories = $this->categoryModel->getAll();
+        require_once './views/user/products.php';
+    }
 }
