@@ -3,6 +3,7 @@ class AdminController {
     private $productModel;
     private $categoryModel;
     private $contactModel;
+    private $userModel;
     public function __construct()
     {
         if(session_status() !== PHP_SESSION_ACTIVE){
@@ -12,6 +13,18 @@ class AdminController {
         $this->productModel = new Product($db);
         $this->categoryModel = new Category($db);
         $this->contactModel = new Contact($db);
+        $this->userModel = new User($db);
+        $this->checkAdmin();
+    }
+     private function checkAdmin() {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['user']) || $_SESSION['user']['role_name'] !== 'admin') {
+            header('Location: ' . BASE_URL . '?act=login');
+            exit;
+        }
     }
     public function products() {
         $products = $this->productModel->getAll();
@@ -271,33 +284,33 @@ class AdminController {
     public function dashboard() {
         $db = connectDB();
         
-        // Get statistics
+        
         $stats = [];
-        // Total revenue
+        
         $query = "SELECT SUM(total_price) as total_revenue FROM orders";
         $stmt = $db->prepare($query);
         $stmt->execute();
         $stats['total_revenue'] = $stmt->fetch()['total_revenue'] ?? 0;
 
-        // Total orders
+        
         $query = "SELECT COUNT(*) as total_orders FROM orders";
         $stmt = $db->prepare($query);
         $stmt->execute();
         $stats['total_orders'] = $stmt->fetch()['total_orders'] ?? 0;
 
-        // Total products
+        
         $query = "SELECT COUNT(*) as total_products FROM products";
         $stmt = $db->prepare($query);
         $stmt->execute();
         $stats['total_products'] = $stmt->fetch()['total_products'] ?? 0;
 
-        // Total users
+        
         $query = "SELECT COUNT(*) as total_users FROM users WHERE role_id = 2";
         $stmt = $db->prepare($query);
         $stmt->execute();
         $stats['total_users'] = $stmt->fetch()['total_users'] ?? 0;
 
-        // Top selling products
+        
         $query = "SELECT p.id, p.name, COALESCE(SUM(oi.quantity), 0) as quantity_sold, COALESCE(SUM(oi.price * oi.quantity), 0) as revenue 
                   FROM products p 
                   LEFT JOIN product_variants pv ON pv.product_id = p.id
@@ -309,7 +322,7 @@ class AdminController {
         $stmt->execute();
         $stats['top_products'] = $stmt->fetchAll();
 
-        // Recent orders
+       
         $query = "SELECT o.*, u.name as user_name FROM orders o 
                   JOIN users u ON o.user_id = u.id 
                   ORDER BY o.created_at DESC LIMIT 10";
@@ -317,7 +330,7 @@ class AdminController {
         $stmt->execute();
         $stats['recent_orders'] = $stmt->fetchAll();
 
-        // Revenue history for chart (last 7 days)
+       
         $startDate = date('Y-m-d', strtotime('-6 days'));
         $endDate = date('Y-m-d');
         $query = "SELECT DATE(created_at) as order_date, SUM(total_price) as total_revenue 
@@ -342,7 +355,7 @@ class AdminController {
             ];
         }
 
-        // Order status counts for chart
+       
         $query = "SELECT status, COUNT(*) as count FROM orders GROUP BY status";
         $stmt = $db->prepare($query);
         $stmt->execute();
@@ -354,7 +367,7 @@ class AdminController {
         require_once './views/admin/dashboard.php';
     }
 
-    // User Management
+    
     public function users() {
         $db = connectDB();
         
@@ -409,7 +422,7 @@ class AdminController {
     public function userDelete() {
         $id = (int)$_GET['id'] ?? 0;
         
-        // Prevent deleting yourself
+       
         if ($id === $_SESSION['user']['id']) {
             $_SESSION['error'] = 'Không thể xóa chính mình';
             header('Location: ' . BASE_URL . '?act=admin_users');
@@ -429,7 +442,7 @@ class AdminController {
         }
     }
 
-    // Order Management
+    
     public function orders() {
         $db = connectDB();
         
@@ -457,7 +470,7 @@ class AdminController {
         $id = (int)$_GET['id'] ?? 0;
         $db = connectDB();
         
-        // Get order info
+        
         $query = "SELECT o.*, u.name as user_name, u.email as user_email, u.phone as user_phone FROM orders o 
                   JOIN users u ON o.user_id = u.id 
                   WHERE o.id = ?";
@@ -470,7 +483,7 @@ class AdminController {
             exit;
         }
 
-        // Get order items
+      
         $query = "SELECT oi.*, pv.size, p.name as product_name FROM order_items oi 
                   JOIN product_variants pv ON oi.product_variant_id = pv.id 
                   JOIN products p ON pv.product_id = p.id 
@@ -479,13 +492,13 @@ class AdminController {
         $stmt->execute([$id]);
         $order_items = $stmt->fetchAll();
 
-        // Get shipping address
+        
         $query = "SELECT * FROM shipping_addresses WHERE id = ?";
         $stmt = $db->prepare($query);
         $stmt->execute([$order['address_id']]);
         $shipping_address = $stmt->fetch();
 
-        // Get payment info
+      
         $query = "SELECT * FROM payments WHERE order_id = ?";
         $stmt = $db->prepare($query);
         $stmt->execute([$id]);
@@ -561,7 +574,7 @@ class AdminController {
         $id = (int)$_GET['id'] ?? 0;
         $db = connectDB();
         
-        // Delete cascading
+        
         $query = "DELETE FROM order_items WHERE order_id = ?";
         $stmt = $db->prepare($query);
         $stmt->execute([$id]);

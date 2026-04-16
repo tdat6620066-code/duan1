@@ -31,7 +31,7 @@ require_once './models/User.php';
 require_once './models/ShippingAddress.php';
 require_once './models/ProductVariant.php';
 require_once './models/Contact.php';
-require_once './models/Payment.php';
+
 // Route
 $act = $_GET['act'] ?? '/';
 
