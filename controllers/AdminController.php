@@ -1,5 +1,6 @@
 <?php
-class AdminController {
+class AdminController
+{
     private $productModel;
     private $categoryModel;
     private $contactModel;
@@ -7,7 +8,7 @@ class AdminController {
     private $orderModel;
     public function __construct()
     {
-        if(session_status() !== PHP_SESSION_ACTIVE){
+        if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
         $db = connectDB();
@@ -16,126 +17,143 @@ class AdminController {
         $this->contactModel = new Contact($db);
         $this->userModel = new User($db);
         $this->orderModel = new Order($db);
+
+        $this->checkAdmin();
     }
-    public function products() {
+
+    private function checkAdmin() {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['user']) || $_SESSION['user']['role_name'] !== 'admin') {
+            header('Location: ' . BASE_URL . '?act=login');
+            exit;
+        }
+    }
+    public function products()
+    {
         $products = $this->productModel->getAll();
         require_once './views/admin/products.php';
     }
-    private function handleImageUpload($fileInputName) {
-        if(isset($_FILES[$fileInputName]) && $_FILES[$fileInputName]['error'] === UPLOAD_ERR_OK){
+    private function handleImageUpload($fileInputName)
+    {
+        if (isset($_FILES[$fileInputName]) && $_FILES[$fileInputName]['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES[$fileInputName];
             $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
             $allowed = ['jpg', 'jpeg', 'png', 'gif'];
-            if(!in_array($extension, $allowed)){
+            if (!in_array($extension, $allowed)) {
                 return null;
             }
             $uploadDir = 'uploads/products/';
-            if(!is_dir($uploadDir)){
+            if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
             $newName = uniqid('prod_', true) . '.' . $extension;
             $target = $uploadDir . $newName;
-            if(move_uploaded_file($file['tmp_name'], $target)){
+            if (move_uploaded_file($file['tmp_name'], $target)) {
                 return $target;
             }
         }
         return null;
     }
-    public function productCreate() {
-        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+    public function productCreate()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = '';
             $category_id = (int)($_POST['category_id'] ?? 0);
             $name = trim($_POST['name'] ?? '');
             $description = trim($_POST['description'] ?? '');
             $price = isset($_POST['price']) ? (float)$_POST['price'] : 0;
             $imageUrl = $this->handleImageUpload('image');
-            if(!$imageUrl && !empty($_POST['image_url'])){
+            if (!$imageUrl && !empty($_POST['image_url'])) {
                 $imageUrl = trim($_POST['image_url']);
             }
-            if($category_id <=0){
+            if ($category_id <= 0) {
                 $error .= 'Vui lòng chọn danh mục.<br>';
             }
-            if($name === ''){
+            if ($name === '') {
                 $error .= 'Vui lòng nhập tên sản phẩm.<br>';
             }
-            if($description === ''){
-                $error.= 'Vui lòng nhập mô tả.<br>';
+            if ($description === '') {
+                $error .= 'Vui lòng nhập mô tả.<br>';
             }
-            if($price <= 0){
+            if ($price <= 0) {
                 $error .= 'Giá phải lớn hơn 0 .<br>';
             }
-            if(empty($imageUrl)){
+            if (empty($imageUrl)) {
                 $error .= 'Vui lòng chọn hoặc nhập hình ảnh .<br>';
             }
-          if($error === ''){
-              $data = [
-                'category_id' => (int)$_POST['category_id'],
-                'name' => trim($_POST['name']),
-                'description' => trim($_POST['description']),
-                'price' => (float)$_POST['price'],
-                'image_url' => $imageUrl
-            ];
-            $db = connectDB();
-            $productModel = new Product($db);
-            $variantModel = new ProductVariant($db);
-            $result = $productModel->create($data);
-            if($result){
-                $productId = $db->lastInsertId();
-                $defaultSizes = [38, 39, 40, 41, 42];
-                foreach($defaultSizes as $size){
-                    $stockValue = max(0, intval($_POST['stock_' . $size] ?? 10));
-                    $variantModel->create([
-                        'product_id' => $productId,
-                        'size' => $size,
-                        'stock' => $stockValue
-                    ]);
+            if ($error === '') {
+                $data = [
+                    'category_id' => (int)$_POST['category_id'],
+                    'name' => trim($_POST['name']),
+                    'description' => trim($_POST['description']),
+                    'price' => (float)$_POST['price'],
+                    'image_url' => $imageUrl
+                ];
+                $db = connectDB();
+                $productModel = new Product($db);
+                $variantModel = new ProductVariant($db);
+                $result = $productModel->create($data);
+                if ($result) {
+                    $productId = $db->lastInsertId();
+                    $defaultSizes = [38, 39, 40, 41, 42];
+                    foreach ($defaultSizes as $size) {
+                        $stockValue = max(0, intval($_POST['stock_' . $size] ?? 10));
+                        $variantModel->create([
+                            'product_id' => $productId,
+                            'size' => $size,
+                            'stock' => $stockValue
+                        ]);
+                    }
+
+                    header('Location: ' . BASE_URL . '?act=admin_products');
+                    exit;
+                } else {
+                    $error = 'Thêm sản phẩm thất bại';
                 }
-            
-                header('Location: ' . BASE_URL . '?act=admin_products');
-                exit;
-            }else {
-                $error = 'Thêm sản phẩm thất bại';
             }
-          }
         }
         $categories = $this->categoryModel->getAll();
         require_once './views/admin/product_create.php';
     }
-    public function productEdit(){
+    public function productEdit()
+    {
         $id = (int)$_GET['id'] ?? 0;
         $product = $this->productModel->getById($id);
-        if(!$product){
+        if (!$product) {
             header('Location: ' . BASE_URL . '?act=admin_products');
             exit;
         }
         $variantModel = new ProductVariant(connectDB());
         $variants = $variantModel->getByProductId($id);
-        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = '';
             $category_id = (int)($_POST['category_id'] ?? 0);
             $name = trim($_POST['name'] ?? '');
             $description = trim($_POST['description'] ?? '');
             $price = isset($_POST['price']) ? (float)$_POST['price'] : 0;
             $imageUrl = $this->handleImageUpload('image');
-            if(!$imageUrl){
+            if (!$imageUrl) {
                 $imageUrl = trim($_POST['image_url'] ?? $product['image_url'] ?? '');
             }
-            if($category_id <= 0){
+            if ($category_id <= 0) {
                 $error .= 'Vui lòng chọn danh mục.<br>';
             }
-            if($name === ''){
+            if ($name === '') {
                 $error .= 'Vui lòng chọn tên sản phẩm.<br>';
             }
-            if($description === ''){
+            if ($description === '') {
                 $error .= 'Vui lòng nhập mô tả.<br>';
             }
-            if($price <=0){
+            if ($price <= 0) {
                 $error .= 'Giá phải lớn hơn 0 .<br>';
             }
-            if(empty($imageUrl)){
+            if (empty($imageUrl)) {
                 $error .= 'Vui lòng chọn hình ảnh.<br>';
             }
-            if($error === ''){
+            if ($error === '') {
                 $data = [
                     'id' => $id,
                     'category_id' => $category_id,
@@ -144,8 +162,8 @@ class AdminController {
                     'price' => $price,
                     'image_url' => $imageUrl,
                 ];
-                if($this->productModel->update($id, $data)){
-                    foreach($variants as $variant){
+                if ($this->productModel->update($id, $data)) {
+                    foreach ($variants as $variant) {
                         $stockValues = $_POST['variant_stock'] ?? [];
                         $stockValue = max(0, intval($stockValues[$variant['id']] ?? $variant['stock']));
                         $variantModel->update($variant['id'], [
@@ -155,7 +173,7 @@ class AdminController {
                     }
                     header('Location: ' . BASE_URL . '?act=admin_products');
                     exit;
-                }else {
+                } else {
                     $error = 'Cập nhật sản phẩm thất bại';
                 }
             }
@@ -163,69 +181,74 @@ class AdminController {
         $categories = $this->categoryModel->getAll();
         require_once './views/admin/product_edit.php';
     }
-    public function productDelete(){
+    public function productDelete()
+    {
         $id = (int)$_GET['id'] ?? 0;
-        if($this->productModel->delete($id)){
+        if ($this->productModel->delete($id)) {
             header('Location: ' . BASE_URL . '?act=admin_products');
             exit;
-        }else {
+        } else {
             $_SESSION['error'] = 'Không thể xóa sản phẩm';
             header('Location: ' . BASE_URL . '?act=admin_products');
             exit;
         }
     }
-    public function categories(){
+    public function categories()
+    {
         $categories = $this->categoryModel->getAll();
         require_once './views/admin/categories.php';
     }
-    public function categoryCreate(){
-        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+    public function categoryCreate()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
                 'name' => trim($_POST['name']),
                 'description' => trim($_POST['description'])
             ];
-            if($this->categoryModel->create($data)){
+            if ($this->categoryModel->create($data)) {
                 header('Location: ' . BASE_URL . '?act=admin_categories');
                 exit;
-            }else {
+            } else {
                 $error = 'Thêm danh mục thất bại';
             }
         }
         require_once './views/admin/category_create.php';
     }
-    public function categoryEdit(){
+    public function categoryEdit()
+    {
         $id = (int)$_GET['id'] ?? 0;
         $category = $this->categoryModel->getById($id);
-        if(!$category){
+        if (!$category) {
             header('Location: ' . BASE_URL . '?act=admin_categories');
             exit;
         }
-        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
                 'name' => trim($_POST['name']),
                 'description' => trim($_POST['description'])
             ];
-            if($this->categoryModel->update($id, $data)){
+            if ($this->categoryModel->update($id, $data)) {
                 header('Location: ' . BASE_URL . '?act=admin_categories');
                 exit;
-            }else {
+            } else {
                 $error = 'Cập nhật danh mục thất bại';
             }
         }
         require_once './views/admin/category_edit.php';
     }
-    public function categoryDelete(){
+    public function categoryDelete()
+    {
         $id = (int)$_GET['id'] ?? 0;
         $productCount = $this->productModel->countByCategory($id);
-        if($productCount > 0){
+        if ($productCount > 0) {
             $_SESSION['error'] = 'Không thể xóa danh mục vì hiện có ' . $productCount . ' sản phẩm thuộc danh mục này.';
             header('Location: ' . BASE_URL . '?act=admin_categories');
             exit;
         }
-        if($this->categoryModel->delete($id)){
+        if ($this->categoryModel->delete($id)) {
             header('Location: ' . BASE_URL . '?act=admin_categories');
             exit;
-        }else {
+        } else {
             $_SESSION['error'] = 'Không thể xóa danh mục';
             header('Location: ' . BASE_URL . '?act=admin_categories');
             exit;
@@ -236,25 +259,26 @@ class AdminController {
         $contacts = $this->contactModel->getAll();
         require_once './views/admin/contacts.php';
     }
-    public function contactShow(){
+    public function contactShow()
+    {
         $id = (int)($_GET['id'] ?? 0);
         $contact = $this->contactModel->getById($id);
-        if(!$contact){
+        if (!$contact) {
             $_SESSION['error'] = 'Không tìm thấy yêu cầu liên hệ';
             header('Location: ' . BASE_URL . '?act=admin_contacts');
             exit;
         }
-        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $status = trim($_POST['status'] ?? $contact['status']);
             $allowed = ['mới', 'đã xử lý', 'đã phản hồi'];
-             if (!in_array($status, $allowed, true)) {
+            if (!in_array($status, $allowed, true)) {
                 $status = 'mới';
             }
-            if($this->contactModel->updateStatus($id, $status)){
+            if ($this->contactModel->updateStatus($id, $status)) {
                 $_SESSION['success'] = 'Cập nhật trạng thái liên hệ thành công';
                 header('Location: ' . BASE_URL . '?act=admin_contact_show&id=' . $id);
                 exit;
-            }else {
+            } else {
                 $_SESSION['error'] = 'Cập nhật trạng thái liên hệ thất bại';
                 header('Location: ' . BASE_URL . '?act=admin_contract_show&id' . $id);
                 exit;
@@ -262,19 +286,21 @@ class AdminController {
         }
         require_once './views/admin/contact_show.php';
     }
-    public function contactDelete(){
+    public function contactDelete()
+    {
         $id = (int)($_GET['id'] ?? 0);
-        if($this->contactModel->delete($id)){
+        if ($this->contactModel->delete($id)) {
             $_SESSION['seccess'] = 'Xóa liên hệ thành công';
-        }else {
+        } else {
             $_SESSION['error'] = 'Không thể xóa liên hệ ';
         }
         header('Location: ' . BASE_URL . '?act=admin_contacts');
         exit;
     }
-    public function dashboard() {
+    public function dashboard()
+    {
         $db = connectDB();
-        
+
         // Get statistics
         $stats = [];
         // Total revenue
@@ -329,7 +355,7 @@ class AdminController {
                   WHERE DATE(created_at) BETWEEN ? AND ? 
                   GROUP BY DATE(created_at) 
                   ORDER BY DATE(created_at) ASC";
-                  $stmt = $db->prepare($query);
+        $stmt = $db->prepare($query);
         $stmt->execute([$startDate, $endDate]);
         $revenueRows = $stmt->fetchAll();
         $revenueMap = [];
@@ -359,23 +385,25 @@ class AdminController {
     }
 
     // User Management
-    public function users() {
+    public function users()
+    {
         $db = connectDB();
-        
+
         $query = "SELECT u.*, r.name as role_name FROM users u 
                   JOIN roles r ON u.role_id = r.id 
                   ORDER BY u.id DESC";
         $stmt = $db->prepare($query);
         $stmt->execute();
         $users = $stmt->fetchAll();
-        
+
         require_once './views/admin/users.php';
     }
 
-    public function userEdit() {
+    public function userEdit()
+    {
         $id = (int)$_GET['id'] ?? 0;
         $user = $this->userModel->getById($id);
-        
+
         if (!$user) {
             header('Location: ' . BASE_URL . '?act=admin_users');
             exit;
@@ -410,9 +438,10 @@ class AdminController {
         require_once './views/admin/user_edit.php';
     }
 
-    public function userDelete() {
+    public function userDelete()
+    {
         $id = (int)$_GET['id'] ?? 0;
-        
+
         // Prevent deleting yourself
         if ($id === $_SESSION['user']['id']) {
             $_SESSION['error'] = 'Không thể xóa chính mình';
@@ -434,20 +463,22 @@ class AdminController {
     }
 
     // Order Management
-    public function orders() {
+    public function orders()
+    {
         $db = connectDB();
-        
+
         $query = "SELECT o.*, u.name as user_name, u.email as user_email FROM orders o 
                   JOIN users u ON o.user_id = u.id 
                   ORDER BY o.created_at DESC";
         $stmt = $db->prepare($query);
         $stmt->execute();
         $orders = $stmt->fetchAll();
-        
+
         require_once './views/admin/orders.php';
     }
 
-    private function getOrderStatusTransitions() {
+    private function getOrderStatusTransitions()
+    {
         return [
             'chờ xác nhận' => ['đã xác nhận', 'đã hủy'],
             'đã xác nhận' => ['đang giao', 'đã hủy'],
@@ -457,10 +488,11 @@ class AdminController {
         ];
     }
 
-    public function orderShow() {
+    public function orderShow()
+    {
         $id = (int)$_GET['id'] ?? 0;
         $db = connectDB();
-        
+
         // Get order info
         $query = "SELECT o.*, u.name as user_name, u.email as user_email, u.phone as user_phone FROM orders o 
                   JOIN users u ON o.user_id = u.id 
@@ -468,7 +500,7 @@ class AdminController {
         $stmt = $db->prepare($query);
         $stmt->execute([$id]);
         $order = $stmt->fetch();
-        
+
         if (!$order) {
             header('Location: ' . BASE_URL . '?act=admin_orders');
             exit;
@@ -494,7 +526,7 @@ class AdminController {
         $stmt = $db->prepare($query);
         $stmt->execute([$id]);
         $payment = $stmt->fetch();
-        
+
         $statusTransitions = $this->getOrderStatusTransitions();
         $currentStatus = $order['status'];
         $nextStatuses = $statusTransitions[$currentStatus] ?? [];
@@ -502,7 +534,8 @@ class AdminController {
         require_once './views/admin/order_show.php';
     }
 
-    public function orderUpdateStatus() {
+    public function orderUpdateStatus()
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $order_id = (int)$_POST['order_id'];
             $status = trim(mb_strtolower($_POST['status']));
@@ -561,22 +594,23 @@ class AdminController {
         }
     }
 
-    public function orderDelete() {
+    public function orderDelete()
+    {
         $id = (int)$_GET['id'] ?? 0;
         $db = connectDB();
-        
+
         // Delete cascading
         $query = "DELETE FROM order_items WHERE order_id = ?";
         $stmt = $db->prepare($query);
         $stmt->execute([$id]);
-        
+
         $query = "DELETE FROM payments WHERE order_id = ?";
         $stmt = $db->prepare($query);
         $stmt->execute([$id]);
-        
+
         $query = "DELETE FROM orders WHERE id = ?";
         $stmt = $db->prepare($query);
-        
+
         if ($stmt->execute([$id])) {
             $_SESSION['success'] = 'Xóa đơn hàng thành công';
             header('Location: ' . BASE_URL . '?act=admin_orders');

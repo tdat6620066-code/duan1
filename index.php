@@ -17,11 +17,12 @@ require_once './models/Order.php';
 
 
 
+
 require_once './controllers/AdminController.php';
 
 
 
- session_set_cookie_params(0, '/duan1');
+ session_set_cookie_params(0, '/DA1_duyTung');
  session_start();
 // Require toàn bộ file Models
 require_once './models/Product.php';
@@ -31,7 +32,7 @@ require_once './models/User.php';
 require_once './models/ShippingAddress.php';
 require_once './models/ProductVariant.php';
 require_once './models/Contact.php';
-require_once './models/Payment.php';
+
 // Route
 $act = $_GET['act'] ?? '/';
 
