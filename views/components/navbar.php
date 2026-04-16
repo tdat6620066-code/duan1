@@ -16,20 +16,22 @@
                     <?php if (isset($_SESSION['user'])): ?>
                         <a href="?act=cart" class="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Giỏ hàng</a>
                         <a href="?act=orders" class="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Đơn hàng</a>
+                         <a href="?act=profile" class="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Liên hệ</a>
                     <?php endif; ?>
                 </div>
             </div>
 
             <!-- Search Bar -->
             <div class="flex-1 max-w-lg mx-8 hidden md:block">
-                <div class="relative">
-                    <input type="text" id="search-input" placeholder="Tìm kiếm sản phẩm..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <form action="" method="get" class="relative">
+                    <input type="hidden" name="act" value="search">
+                    <input type="text" id="search-input" name="q" placeholder="Tìm kiếm sản phẩm..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </div>
-                </div>
+                </form>
             </div>
 
             <!-- User Menu -->

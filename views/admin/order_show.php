@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 include './views/components/admin_navbar.php';
 ?>
 
@@ -32,7 +32,8 @@ include './views/components/admin_navbar.php';
                         <h1 class="text-3xl font-bold mb-2">Đơn hàng #<?php echo $order['id']; ?></h1>
                         <p class="text-gray-600">Ngày đặt: <?php echo date('d/m/Y H:i', strtotime($order['created_at'])); ?></p>
                     </div>
-                    <span class="px-4 py-2 rounded-full text-sm font-semibold
+
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
                         <?php 
                             if ($order['status'] === 'chờ xác nhận') {
                                 echo 'bg-yellow-100 text-yellow-700';

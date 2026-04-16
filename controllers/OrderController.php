@@ -137,26 +137,21 @@ class OrderController {
             exit;
         }
 
-        $order = $this->orderModel->getById($id);
-        if (!$order || $order['user_id'] != $_SESSION['user']['id']) {
-            $_SESSION['error'] = 'Đơn hàng không tồn tại hoặc không thuộc về bạn.';
-            header('Location: ' . BASE_URL . '?act=orders');
+        $_SESSION['error'] = 'Bạn không được phép thay đổi đơn hàng.';
+        header('Location: ' . BASE_URL . '?act=orders');
+        exit;
+    }
+
+    public function delete($id) {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASE_URL . '?act=login');
             exit;
         }
 
-        $status = $order['status'];
-        $notCancelableStatuses = ['shipped', 'delivered', 'cancelled', 'đã xác nhận', 'đang giao', 'đã giao', 'đã hủy'];
-        if (in_array($status, $notCancelableStatuses, true)) {
-            $_SESSION['error'] = 'Đơn hàng không thể hủy ở trạng thái hiện tại.';
-            header('Location: ' . BASE_URL . '?act=orders');
-            exit;
-        }
-
-        if ($this->orderModel->updateStatus($id, 'đã hủy')) {
-            $_SESSION['success'] = 'Hủy đơn hàng thành công.';
-        } else {
-            $_SESSION['error'] = 'Hủy đơn hàng thất bại.';
-        }
+        $_SESSION['error'] = 'Bạn không được phép xóa đơn hàng.';
         header('Location: ' . BASE_URL . '?act=orders');
         exit;
     }

@@ -29,13 +29,7 @@
                         </span>
                     </div>
                 </div>
-                <?php if (!in_array(strtolower($order['status']), ['shipped', 'delivered', 'cancelled', 'đang giao', 'đã giao', 'đã hủy'])): ?>
-                    <div class="mb-6">
-                        <a href="?act=order_cancel&id=<?= $order['id'] ?>" onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?');" class="inline-block bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200">
-                            Hủy đơn hàng
-                        </a>
-                    </div>
-                <?php endif; ?>
+
 
                 <div class="grid gap-6 lg:grid-cols-3 mb-8">
                     <div class="bg-gray-50 rounded-lg p-5">
@@ -47,10 +41,21 @@
                         <h2 class="text-lg font-semibold mb-3">Chi tiết sản phẩm</h2>
                         <div class="space-y-4">
                             <?php foreach ($orderItems as $item): ?>
+                                <?php
+                                $itemImg = $item['image_url'] ?? $item['product_image_url'] ?? '';
+                                if ($itemImg && !preg_match('/^https?:\/\//i', $itemImg)) {
+                                    $itemImg = BASE_URL . ltrim($itemImg, '/');
+                                }
+                                ?>
                                 <div class="flex items-center justify-between gap-4">
-                                    <div>
-                                        <p class="font-medium text-gray-900"><?= htmlspecialchars($item['product_name']) ?></p>
-                                        <p class="text-sm text-gray-600">Size: <?= htmlspecialchars($item['size']) ?> | Số lượng: <?= $item['quantity'] ?></p>
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-none">
+                                            <img src="<?= htmlspecialchars($itemImg ?: 'https://via.placeholder.com/100x100?text=' . urlencode($item['product_name'])) ?>" alt="<?= htmlspecialchars($item['product_name']) ?>" class="w-full h-full object-cover">
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900"><?= htmlspecialchars($item['product_name']) ?></p>
+                                            <p class="text-sm text-gray-600">Size: <?= htmlspecialchars($item['size']) ?> | Số lượng: <?= $item['quantity'] ?></p>
+                                        </div>
                                     </div>
                                     <div class="text-right">
                                         <p class="font-semibold text-gray-900"><?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?>đ</p>

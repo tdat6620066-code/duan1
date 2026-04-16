@@ -37,7 +37,7 @@ class Order {
     }
 
     public function getOrderItems($orderId) {
-        $query = "SELECT oi.*, pv.size, p.name as product_name, p.image_url FROM order_items oi 
+        $query = "SELECT oi.*, pv.size, p.name as product_name, p.image_url AS product_image_url FROM order_items oi 
                   JOIN product_variants pv ON oi.product_variant_id = pv.id 
                   JOIN products p ON pv.product_id = p.id 
                   WHERE oi.order_id = ?";

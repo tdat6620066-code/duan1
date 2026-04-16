@@ -29,14 +29,22 @@ class CartController
 
     public function add()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        header('Content-Type: application/json');
         if (!isset($_SESSION['user'])) {
             echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập']);
             exit;
         }
         $userId = $_SESSION['user']['id'];
-        $variantId = $_POST['variant_id'];
+        $variantId = $_POST['variant_id'] ?? null;
         $quantity = $_POST['quantity'] ?? 1;
+
+        if (!$variantId) {
+            echo json_encode(['success' => false, 'message' => 'Vui lòng chọn kích cỡ']);
+            exit;
+        }
 
         $cart = $this->cartModel->getByUserId($userId);
         if (!$cart) {
@@ -47,46 +55,68 @@ class CartController
 
         if ($this->cartModel->addItem($cartId, $variantId, $quantity)) {
             echo json_encode(['success' => true, 'message' => 'Đã thêm vào giỏ hàng']);
+            exit;
         } else {
             echo json_encode(['success' => false, 'message' => 'Thêm thất bại']);
+            exit;
         }
     }
 
     public function update()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        header('Content-Type: application/json');
         if (!isset($_SESSION['user'])) {
             echo json_encode(['success' => false]);
             exit();
         }
         $userId = $_SESSION['user']['id'];
-        $variantId = $_SESSION['variant_id'];
-        $quantity = $_SESSION['quantity'];
+        $variantId = $_POST['variant_id'] ?? null;
+        $quantity = $_POST['quantity'] ?? 1;
+
+        if (!$variantId) {
+            echo json_encode(['success' => false, 'message' => 'Thiếu mã kích cỡ sản phẩm']);
+            exit;
+        }
 
         $cart = $this->cartModel->getByUserId($userId);
         if ($cart && $this->cartModel->updateItem($cart['id'], $variantId, $quantity)) {
             echo json_encode(['success' => true]);
+            exit;
         } else {
             echo json_encode(['success' => false]);
+            exit;
         }
     }
 
     public function remove()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        header('Content-Type: application/json');
         if (!isset($_SESSION['user'])) {
             echo json_encode(['success' => false]);
             exit;
         }
 
         $userId = $_SESSION['user']['id'];
-        $variantId = $_POST['variant_id'];
+        $variantId = $_POST['variant_id'] ?? null;
+
+        if (!$variantId) {
+            echo json_encode(['success' => false, 'message' => 'Thiếu mã kích cỡ sản phẩm']);
+            exit;
+        }
 
         $cart = $this->cartModel->getByUserId($userId);
         if ($cart && $this->cartModel->removeItem($cart['id'], $variantId)) {
             echo json_encode(['success' => true]);
+            exit;
         } else {
             echo json_encode(['success' => false]);
+            exit;
         }
     }
 }
