@@ -166,7 +166,7 @@ function updateCartItem(variantId, quantity) {
             itemTotalEl.textContent = formatCurrency(data.line_total);
         }
 
-        updateCartSummary(data.subtotal, data.shipping || 0);
+        updateCartSummary(data.subtotal, data.shipping);
         showToast('Cập nhật giỏ hàng thành công', 'success');
     })
     .catch(error => {

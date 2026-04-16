@@ -83,7 +83,21 @@ class CartController
 
         $cart = $this->cartModel->getByUserId($userId);
         if ($cart && $this->cartModel->updateItem($cart['id'], $variantId, $quantity)) {
-            echo json_encode(['success' => true]);
+            $cartItems = $this->cartModel->getCartItems($cart['id']);
+            $subtotal = 0;
+            $lineTotal = 0;
+            foreach ($cartItems as $item) {
+                $subtotal += $item['price'] * $item['quantity'];
+                if ($item['product_variant_id'] == $variantId) {
+                    $lineTotal = $item['price'] * $item['quantity'];
+                }
+            }
+            echo json_encode([
+                'success' => true,
+                'subtotal' => $subtotal,
+                'shipping' => SHIPPING_COST,
+                'line_total' => $lineTotal
+            ]);
             exit;
         } else {
             echo json_encode(['success' => false]);

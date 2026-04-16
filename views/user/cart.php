@@ -22,6 +22,8 @@
             foreach ($cartItems as $item) {
                 $cartSubtotal += $item['price'] * $item['quantity'];
             }
+            $cartShipping = SHIPPING_COST;
+            $cartTotal = $cartSubtotal + $cartShipping;
             ?>
 
             <?php if (empty($cartItems)): ?>
@@ -85,13 +87,13 @@
                             </div>
                             <div class="flex justify-between">
                                 <span>Phí giao hàng</span>
-                                <span id="cart-shipping">Miễn phí</span>
+                                <span id="cart-shipping"><?= number_format($cartShipping, 0, ',', '.') ?>đ</span>
                             </div>
                         </div>
                         <div class="border-t pt-4">
                             <div class="flex justify-between text-lg font-semibold">
                                 <span>Tổng cộng</span>
-                                <span id="cart-total" class="text-blue-600"><?= number_format($cartSubtotal, 0, ',', '.') ?>đ</span>
+                                <span id="cart-total" class="text-blue-600"><?= number_format($cartTotal, 0, ',', '.') ?>đ</span>
                             </div>
                         </div>
                         <a href="?act=checkout"
@@ -103,6 +105,7 @@
             <?php endif; ?>
         </div>
     </div>
+    <script>const SHIPPING_COST = <?= SHIPPING_COST ?>;</script>
     <script src="public/js/script.js"></script>
 </body>
 
